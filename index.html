@@ -27,6 +27,7 @@
             width: 100%;
             max-width: 1400px;
             margin: 0 auto;
+            z-index: 1;
         }
 
         .video-card {
@@ -37,6 +38,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             transition: all 0.3s ease;
             background: transparent;
+            z-index: 1;
         }
 
         .video-card:hover {
@@ -266,6 +268,11 @@
             z-index: 2;
         }
 
+        .content-wrapper > * {
+            position: relative;
+            z-index: auto;
+        }
+
         .grid-pattern-container {
             position: absolute;
             inset: 0;
@@ -357,14 +364,15 @@
         </div>
     </div>
 
-    <!-- Video Modal -->
+    </div> <!-- Close content-wrapper -->
+
+    <!-- Video Modal (fuera del content-wrapper para z-index correcto) -->
     <div id="videoModal" class="video-modal">
         <div class="video-modal-content">
             <!-- Aquí debes poner la URL de tu video (YouTube embed, Vimeo, etc.) -->
             <video id="videoFrame" class="video-iframe" controls autoplay playsinline webkit-playsinline></video>
         </div>
     </div>
-    </div> <!-- Close content-wrapper -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script>
