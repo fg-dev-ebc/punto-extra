@@ -361,7 +361,7 @@
     <div id="videoModal" class="video-modal">
         <div class="video-modal-content">
             <!-- Aquí debes poner la URL de tu video (YouTube embed, Vimeo, etc.) -->
-            <video id="videoFrame" class="video-iframe" controls autoplay></video>
+            <video id="videoFrame" class="video-iframe" controls autoplay playsinline webkit-playsinline></video>
         </div>
     </div>
     </div> <!-- Close content-wrapper -->
@@ -557,86 +557,19 @@
         let closeButton = null;
 
         function openVideoModal() {
-            // En móvil: crear video temporal y pantalla completa directa
+            const modal = document.getElementById('videoModal');
+            const frame = document.getElementById('videoFrame');
+
+            // Mismo comportamiento para móvil y escritorio
+            frame.src = VIDEO_URL;
+
+            // En móvil, agregar playsinline para evitar pantalla completa automática
             if (isMobileDevice()) {
-                // Crear contenedor
-                const container = document.createElement('div');
-                container.style.position = 'fixed';
-                container.style.top = '0';
-                container.style.left = '0';
-                container.style.width = '100%';
-                container.style.height = '100%';
-                container.style.backgroundColor = '#000';
-                container.style.zIndex = '9999';
-                container.style.display = 'flex';
-                container.style.flexDirection = 'column';
-                container.style.alignItems = 'center';
-                container.style.justifyContent = 'center';
-
-                // Crear botón de cerrar
-                closeButton = document.createElement('button');
-                closeButton.innerHTML = '✕';
-                closeButton.style.position = 'absolute';
-                closeButton.style.top = '20px';
-                closeButton.style.right = '20px';
-                closeButton.style.width = '50px';
-                closeButton.style.height = '50px';
-                closeButton.style.borderRadius = '50%';
-                closeButton.style.border = '2px solid #fff';
-                closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                closeButton.style.color = '#fff';
-                closeButton.style.fontSize = '24px';
-                closeButton.style.cursor = 'pointer';
-                closeButton.style.zIndex = '10000';
-                closeButton.style.display = 'flex';
-                closeButton.style.alignItems = 'center';
-                closeButton.style.justifyContent = 'center';
-                closeButton.style.fontWeight = 'bold';
-
-                // Crear elemento de video temporal
-                mobileVideo = document.createElement('video');
-                mobileVideo.src = VIDEO_URL;
-                mobileVideo.controls = true;
-                mobileVideo.style.width = '100%';
-                mobileVideo.style.height = '100%';
-                mobileVideo.style.objectFit = 'contain';
-
-                container.appendChild(closeButton);
-                container.appendChild(mobileVideo);
-                document.body.appendChild(container);
-
-                // Función para limpiar
-                const cleanupMobileVideo = () => {
-                    if (mobileVideo && mobileVideo.parentNode) {
-                        mobileVideo.pause();
-                        mobileVideo.src = '';
-                        if (document.fullscreenElement) {
-                            document.exitFullscreen();
-                        }
-                        if (container.parentNode) {
-                            document.body.removeChild(container);
-                        }
-                        mobileVideo = null;
-                        closeButton = null;
-                    }
-                };
-
-                // Click en botón de cerrar
-                closeButton.addEventListener('click', cleanupMobileVideo);
-
-                // Reproducir (el móvil maneja pantalla completa automáticamente)
-                mobileVideo.play();
-
-                // Evento cuando termine el video
-                mobileVideo.addEventListener('ended', cleanupMobileVideo);
-
-            } else {
-                // En escritorio: comportamiento normal con modal
-                const modal = document.getElementById('videoModal');
-                const frame = document.getElementById('videoFrame');
-                frame.src = VIDEO_URL;
-                modal.classList.add('active');
+                frame.setAttribute('playsinline', '');
+                frame.setAttribute('webkit-playsinline', '');
             }
+
+            modal.classList.add('active');
         }
 
         function closeVideoModal() {
