@@ -25,9 +25,15 @@
         .video-container {
             position: relative;
             width: 100%;
-            max-width: 1400px;
+            max-width: 550px;
             margin: 0 auto;
             z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .video-container {
+                max-width: 100%;
+            }
         }
 
         .video-card {
@@ -338,7 +344,7 @@
     </div>
 
     <!-- Video Section -->
-    <div class="max-w-7xl mx-auto px-6 py-16">
+    <div class="max-w-7xl mx-auto px-6 py-8">
         <div class="video-container fade-in" style="animation-delay: 0.4s;">
             <div class="video-card" id="videoCard">
                 <div class="thumbnail-container" onclick="openVideoModal()">
