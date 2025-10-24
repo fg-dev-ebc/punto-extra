@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundamentos de la Nube</title>
+    <link rel="icon" type="image/x-icon" href="favicon2.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --color-blue-700: oklch(48.8% .243 264.376);
+        }
+
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #09090b;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .video-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .video-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .thumbnail-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #18181b, #09090b);
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .thumbnail-container:hover {
+            filter: brightness(0.8);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 112px;
+            height: 112px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .thumbnail-container:hover .play-button {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .play-button-inner {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(to bottom, #ffffff, #e5e5e5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .thumbnail-container:hover .play-button-inner {
+            transform: scale(1.2);
+            transition: transform 0.2s ease;
+        }
+
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 20px solid #000000;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            margin-left: 5px;
+            filter: drop-shadow(0 4px 3px rgb(0 0 0 / 0.07)) drop-shadow(0 2px 2px rgb(0 0 0 / 0.06));
+        }
+
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 1200px;
+            aspect-ratio: 16 / 9;
+        }
+
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        .professor-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            color: #93c5fd;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .marquee-container {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            background: linear-gradient(to right, #09090b 0%, transparent 10%, transparent 90%, #09090b 100%);
+        }
+
+        .marquee-content {
+            display: flex;
+            width: fit-content;
+            animation: marquee 20s linear infinite;
+        }
+
+        .marquee-content:hover {
+            animation-play-state: paused;
+        }
+
+        .marquee-item {
+            white-space: nowrap;
+            padding: 0 2rem;
+        }
+
+        @keyframes slideInFromLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            0% {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide-in-left {
+            animation: slideInFromLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-slide-in-right {
+            animation: slideInFromRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .badge-item {
+            opacity: 0;
+            position: relative;
+        }
+
+        .badge-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+
+        .grid-pattern-container {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .grid-pattern {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transform: skewY(-12deg);
+            mask-image: radial-gradient(1000px circle at center, white, transparent);
+            -webkit-mask-image: radial-gradient(1000px circle at center, white, transparent);
+        }
+
+        .grid-pattern svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .grid-line {
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 1;
+            fill: none;
+            transition: stroke 0.3s ease;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-black">
+    <!-- Particles Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+    <!-- Header -->
+    <div class="border-b border-zinc-800/50 bg-zinc-950" style="position: relative;">
+        <!-- Grid Pattern Background -->
+        <div class="grid-pattern-container">
+            <div class="grid-pattern" id="gridPattern">
+                <svg id="gridSvg"></svg>
+            </div>
+        </div>
+
+        <!-- Header Content -->
+        <div class="max-w-7xl mx-auto px-6 py-12 text-center header-content">
+            <h1 class="text-4xl font-bold text-white mb-4 fade-in">Fundamentos de la Nube</h1>
+            <div class="flex gap-4 justify-center flex-wrap" id="badgeContainer">
+                <div class="professor-badge badge-item animate-slide-in-left" style="animation-delay: 0.3s;">
+                    Profesor: DAVID SANTIAGO ALARCON GARCIA
+                </div>
+                <div class="professor-badge badge-item animate-slide-in-right" style="animation-delay: 0.5s; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #86efac;">
+                    Alumno: LUIS FELIPE FERNANDEZ GURROLA
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Section -->
+    <div class="max-w-7xl mx-auto px-6 py-16">
+        <div class="video-container fade-in" style="animation-delay: 0.4s;">
+            <div class="video-card" id="videoCard">
+                <div class="thumbnail-container" onclick="openVideoModal()">
+                    <!-- Aquí puedes poner la URL de tu thumbnail/miniatura del video -->
+                    <img src="C:\lffg\utils\yify\django-expuesto.png" alt="Fundamentos de la Nube" class="video-thumbnail">
+                    <div class="play-button">
+                        <div class="play-button-inner">
+                            <div class="play-icon"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8">
+                    <div class="marquee-container">
+                        <div class="marquee-content">
+                            <h2 class="marquee-item text-2xl font-semibold text-white">Despliegue de una instancia EC2 con Django accesible desde Internet</h2>
+                            <h2 class="marquee-item text-2xl font-semibold text-white">Despliegue de una instancia EC2 con Django accesible desde Internet</h2>
+                            <h2 class="marquee-item text-2xl font-semibold text-white">Despliegue de una instancia EC2 con Django accesible desde Internet</h2>
+                            <h2 class="marquee-item text-2xl font-semibold text-white">Despliegue de una instancia EC2 con Django accesible desde Internet</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="videoModal" class="video-modal">
+        <div class="video-modal-content">
+            <!-- Aquí debes poner la URL de tu video (YouTube embed, Vimeo, etc.) -->
+            <iframe id="videoFrame" class="video-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+    </div> <!-- Close content-wrapper -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        // Particles Effect
+        class Particles {
+            constructor(canvas, options = {}) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.quantity = options.quantity || 100;
+                this.color = options.color || '#ffffff';
+                this.ease = options.ease || 80;
+
+                this.resizeCanvas();
+                this.init();
+                this.animate();
+
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
+
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            init() {
+                this.particles = [];
+                for (let i = 0; i < this.quantity; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        radius: Math.random() * 2 + 1
+                    });
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.particles.forEach(particle => {
+                    // Update position
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+
+                    // Bounce off edges
+                    if (particle.x < 0 || particle.x > this.canvas.width) particle.vx *= -1;
+                    if (particle.y < 0 || particle.y > this.canvas.height) particle.vy *= -1;
+
+                    // Draw particle
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = this.color;
+                    this.ctx.globalAlpha = 0.5;
+                    this.ctx.fill();
+                });
+
+                this.ctx.globalAlpha = 1;
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize particles
+        const canvas = document.getElementById('particles-canvas');
+        new Particles(canvas, {
+            quantity: 100,
+            ease: 80,
+            color: '#ffffff'
+        });
+
+        // Interactive Grid Pattern
+        class InteractiveGrid {
+            constructor(svgElement, container) {
+                this.svg = svgElement;
+                this.container = container;
+                this.gridSize = 40;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.lines = [];
+
+                this.init();
+                this.setupInteractivity();
+            }
+
+            init() {
+                const header = this.container.closest('.border-b');
+                const headerRect = header.getBoundingClientRect();
+                const width = headerRect.width;
+                const height = headerRect.height;
+
+                this.svg.setAttribute('width', width);
+                this.svg.setAttribute('height', height);
+                this.svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+                // Create vertical lines
+                for (let x = 0; x <= width; x += this.gridSize) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x);
+                    line.setAttribute('y1', 0);
+                    line.setAttribute('x2', x);
+                    line.setAttribute('y2', height);
+                    line.setAttribute('class', 'grid-line');
+                    this.svg.appendChild(line);
+                    this.lines.push({ element: line, x1: x, y1: 0, x2: x, y2: height });
+                }
+
+                // Create horizontal lines
+                for (let y = 0; y <= height; y += this.gridSize) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', 0);
+                    line.setAttribute('y1', y);
+                    line.setAttribute('x2', width);
+                    line.setAttribute('y2', y);
+                    line.setAttribute('class', 'grid-line');
+                    this.svg.appendChild(line);
+                    this.lines.push({ element: line, x1: 0, y1: y, x2: width, y2: y });
+                }
+            }
+
+            setupInteractivity() {
+                const header = this.container.closest('.border-b');
+
+                header.addEventListener('mousemove', (e) => {
+                    const rect = header.getBoundingClientRect();
+                    this.mouseX = e.clientX - rect.left;
+                    this.mouseY = e.clientY - rect.top;
+                    this.updateGrid();
+                });
+
+                header.addEventListener('mouseleave', () => {
+                    this.resetGrid();
+                });
+            }
+
+            updateGrid() {
+                this.lines.forEach(lineData => {
+                    const { element, x1, y1, x2, y2 } = lineData;
+
+                    // Calculate distance from mouse to line midpoint
+                    const midX = (x1 + x2) / 2;
+                    const midY = (y1 + y2) / 2;
+                    const distance = Math.sqrt(
+                        Math.pow(this.mouseX - midX, 2) +
+                        Math.pow(this.mouseY - midY, 2)
+                    );
+
+                    // Update stroke based on distance
+                    const maxDistance = 200;
+                    const intensity = Math.max(0, 1 - distance / maxDistance);
+                    const opacity = 0.1 + intensity * 0.5;
+
+                    element.style.stroke = `rgba(255, 255, 255, ${opacity})`;
+                });
+            }
+
+            resetGrid() {
+                this.lines.forEach(lineData => {
+                    lineData.element.style.stroke = 'rgba(255, 255, 255, 0.1)';
+                });
+            }
+        }
+
+        // Initialize grid pattern
+        const gridSvg = document.getElementById('gridSvg');
+        const gridPattern = document.getElementById('gridPattern');
+        new InteractiveGrid(gridSvg, gridPattern);
+    </script>
+    <script>
+        // Inicializar Vanilla Tilt en el video card
+        const videoCard = document.getElementById('videoCard');
+        VanillaTilt.init(videoCard, {
+            max: 15,
+            scale: 1.02,
+            speed: 400,
+            glare: true,
+            'max-glare': 0.3
+        });
+
+        // URL del video - Reemplaza esto con tu URL de video real
+        const VIDEO_URL = 'https://www.youtube.com/embed/3LdOOTnhFzg?si=z2fJi5j9K6gYyzOf'; // Cambia esta URL
+
+        function openVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const frame = document.getElementById('videoFrame');
+            frame.src = VIDEO_URL;
+            modal.classList.add('active');
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const frame = document.getElementById('videoFrame');
+            frame.src = '';
+            modal.classList.remove('active');
+        }
+
+        // Cerrar modal al hacer click fuera
+        document.getElementById('videoModal').addEventListener('click', (e) => {
+            if (e.target.id === 'videoModal') {
+                closeVideoModal();
+            }
+        });
+
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+    </script>
+</body>
+</html>
