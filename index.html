@@ -547,11 +547,37 @@
         // URL del video - Reemplaza esto con tu URL de video real
         const VIDEO_URL = 'punto-extra.mp4'; // Cambia esta URL
 
+        // Detectar si es dispositivo móvil
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        }
+
         function openVideoModal() {
             const modal = document.getElementById('videoModal');
             const frame = document.getElementById('videoFrame');
-            frame.src = VIDEO_URL;
-            modal.classList.add('active');
+
+            // En móvil: ir directo a pantalla completa
+            if (isMobileDevice()) {
+                frame.src = VIDEO_URL;
+                modal.classList.add('active');
+
+                // Solicitar pantalla completa inmediatamente
+                setTimeout(() => {
+                    if (frame.requestFullscreen) {
+                        frame.requestFullscreen();
+                    } else if (frame.webkitRequestFullscreen) {
+                        frame.webkitRequestFullscreen();
+                    } else if (frame.mozRequestFullScreen) {
+                        frame.mozRequestFullScreen();
+                    } else if (frame.msRequestFullscreen) {
+                        frame.msRequestFullscreen();
+                    }
+                }, 100);
+            } else {
+                // En escritorio: comportamiento normal con modal
+                frame.src = VIDEO_URL;
+                modal.classList.add('active');
+            }
         }
 
         function closeVideoModal() {
@@ -561,9 +587,9 @@
             modal.classList.remove('active');
         }
 
-        // Cerrar modal al hacer click fuera
+        // Cerrar modal al hacer click fuera (solo en escritorio)
         document.getElementById('videoModal').addEventListener('click', (e) => {
-            if (e.target.id === 'videoModal') {
+            if (e.target.id === 'videoModal' && !isMobileDevice()) {
                 closeVideoModal();
             }
         });
@@ -571,6 +597,19 @@
         // Cerrar modal con tecla ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+
+        // Cerrar modal cuando se sale de pantalla completa en móvil
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && isMobileDevice()) {
+                closeVideoModal();
+            }
+        });
+
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (!document.webkitFullscreenElement && isMobileDevice()) {
                 closeVideoModal();
             }
         });
